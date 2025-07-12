@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquare, Search, Lightbulb, BookOpen, History, Settings, Bell, Zap, Database, Download, RefreshCw } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquare, Search, Lightbulb, BookOpen, History, Settings, Bell, Zap, Database, Download, RefreshCw, Upload, Clock, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
@@ -69,6 +69,7 @@ export default function FAQSidebar() {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [activeSection, setActiveSection] = useState<string>("faq");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggleItem = (id: string) => {
     const newOpenItems = new Set(openItems);
@@ -100,31 +101,64 @@ export default function FAQSidebar() {
     setActiveSection("notifications");
   };
 
-  const exportAnalysis = () => {
-    // Export current analysis results
-    const analysisData = {
+  const uploadLog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        // Auto-fill the analysis panel with uploaded log content
+        const analysisPanel = document.querySelector('textarea[placeholder*="Paste your error"]') as HTMLTextAreaElement;
+        if (analysisPanel) {
+          analysisPanel.value = content;
+          analysisPanel.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        alert(`Log file "${file.name}" uploaded successfully!`);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const checkSystemHealth = () => {
+    setActiveSection("system-health");
+  };
+
+  const generateIncidentReport = () => {
+    const reportData = {
       timestamp: new Date().toISOString(),
-      analysis: "Sample analysis data",
-      recommendations: ["Check database connections", "Restart services"]
+      incident: "System Analysis Report",
+      severity: "Medium",
+      status: "Investigating",
+      description: "Automated incident report generated from AI analysis",
+      recommendations: [
+        "Monitor system resources",
+        "Check error logs for patterns",
+        "Verify database connectivity"
+      ]
     };
-    const blob = new Blob([JSON.stringify(analysisData, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `analysis-${Date.now()}.json`;
+    a.download = `incident-report-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    alert('Incident report generated and downloaded!');
   };
 
-  const clearHistory = () => {
-    // Clear chat and analysis history
-    localStorage.removeItem('chatHistory');
-    localStorage.removeItem('analysisHistory');
-    alert('History cleared successfully');
+  const escalateToL2 = () => {
+    setActiveSection("escalation");
+  };
+
+  const scheduleMaintenance = () => {
+    setActiveSection("maintenance");
   };
 
   const refreshData = () => {
-    // Refresh tickets and analysis data
     window.location.reload();
   };
 
@@ -212,18 +246,110 @@ export default function FAQSidebar() {
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Notifications</h3>
             <div className="space-y-2">
-              <Card className="p-3">
+              <Card className="p-3 border-l-4 border-green-500">
                 <div className="text-sm">
-                  <p className="font-medium">New similar ticket found</p>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    <p className="font-medium">System Health Check Passed</p>
+                  </div>
+                  <p className="text-muted-foreground">2 minutes ago</p>
+                </div>
+              </Card>
+              <Card className="p-3 border-l-4 border-blue-500">
+                <div className="text-sm">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-blue-500" />
+                    <p className="font-medium">New similar ticket found</p>
+                  </div>
                   <p className="text-muted-foreground">10 minutes ago</p>
                 </div>
               </Card>
-              <Card className="p-3">
+              <Card className="p-3 border-l-4 border-yellow-500">
                 <div className="text-sm">
-                  <p className="font-medium">Analysis completed</p>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-yellow-500" />
+                    <p className="font-medium">Scheduled maintenance reminder</p>
+                  </div>
                   <p className="text-muted-foreground">1 hour ago</p>
                 </div>
               </Card>
+            </div>
+          </div>
+        );
+      case "system-health":
+        return (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">System Health</h3>
+            <div className="space-y-3">
+              <Card className="p-3 border-l-4 border-green-500">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">API Response Time</span>
+                  <span className="text-green-600 font-bold">125ms</span>
+                </div>
+              </Card>
+              <Card className="p-3 border-l-4 border-green-500">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Database Connections</span>
+                  <span className="text-green-600 font-bold">Normal</span>
+                </div>
+              </Card>
+              <Card className="p-3 border-l-4 border-yellow-500">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Memory Usage</span>
+                  <span className="text-yellow-600 font-bold">78%</span>
+                </div>
+              </Card>
+              <Card className="p-3 border-l-4 border-green-500">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Error Rate</span>
+                  <span className="text-green-600 font-bold">0.02%</span>
+                </div>
+              </Card>
+            </div>
+          </div>
+        );
+      case "escalation":
+        return (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">L2 Support Escalation</h3>
+            <div className="space-y-3">
+              <Card className="p-3">
+                <h4 className="font-medium mb-2">Escalation Criteria Met</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• High severity issue detected</li>
+                  <li>• Multiple failed resolution attempts</li>
+                  <li>• Customer impact assessment: Medium</li>
+                </ul>
+              </Card>
+              <Button className="w-full" onClick={() => alert('Escalation request sent to L2 Support team!')}>
+                <Zap className="h-4 w-4 mr-2" />
+                Send Escalation Request
+              </Button>
+            </div>
+          </div>
+        );
+      case "maintenance":
+        return (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">Maintenance Scheduler</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium">Maintenance Type</label>
+                <select className="w-full mt-1 p-2 border rounded">
+                  <option>Database Maintenance</option>
+                  <option>System Updates</option>
+                  <option>Security Patches</option>
+                  <option>Performance Optimization</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Scheduled Time</label>
+                <input type="datetime-local" className="w-full mt-1 p-2 border rounded" />
+              </div>
+              <Button className="w-full" onClick={() => alert('Maintenance scheduled successfully!')}>
+                <Clock className="h-4 w-4 mr-2" />
+                Schedule Maintenance
+              </Button>
             </div>
           </div>
         );
@@ -281,6 +407,13 @@ export default function FAQSidebar() {
 
   return (
     <div className="flex flex-col h-full">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept=".log,.txt,.json"
+        style={{ display: 'none' }}
+      />
       <Card className="border-0 rounded-none flex-1">
         <CardHeader className="border-b border-gray-200 dark:border-gray-700 pb-4">
           <CardTitle className="flex items-center gap-2">
@@ -344,13 +477,25 @@ export default function FAQSidebar() {
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-muted-foreground">Quick Actions</h4>
             <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" size="sm" onClick={exportAnalysis} className="justify-start text-xs">
-                <Download className="h-3 w-3 mr-2" />
-                Export Analysis
+              <Button variant="outline" size="sm" onClick={uploadLog} className="justify-start text-xs">
+                <Upload className="h-3 w-3 mr-2" />
+                Upload Log
               </Button>
-              <Button variant="outline" size="sm" onClick={clearHistory} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={checkSystemHealth} className="justify-start text-xs">
+                <Search className="h-3 w-3 mr-2" />
+                Check System Health
+              </Button>
+              <Button variant="outline" size="sm" onClick={generateIncidentReport} className="justify-start text-xs">
+                <Download className="h-3 w-3 mr-2" />
+                Generate Report
+              </Button>
+              <Button variant="outline" size="sm" onClick={escalateToL2} className="justify-start text-xs">
+                <Zap className="h-3 w-3 mr-2" />
+                Escalate to L2
+              </Button>
+              <Button variant="outline" size="sm" onClick={scheduleMaintenance} className="justify-start text-xs">
                 <Database className="h-3 w-3 mr-2" />
-                Clear History
+                Schedule Maintenance
               </Button>
               <Button variant="outline" size="sm" onClick={refreshData} className="justify-start text-xs">
                 <RefreshCw className="h-3 w-3 mr-2" />
