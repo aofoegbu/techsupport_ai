@@ -190,20 +190,36 @@ org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDB
 
             <div className="space-y-4">
               {/* Root Cause Analysis */}
-              {analysisResults.analysis?.rootCause && (
+              {analysisResults.rootCause && (
                 <div className="border-l-4 border-destructive bg-red-50 p-4 rounded-r-lg">
                   <h4 className="font-semibold text-destructive mb-2 flex items-center space-x-2">
                     <AlertTriangle className="w-4 h-4" />
                     <span>Root Cause Identified</span>
                   </h4>
                   <p className="text-sm text-gray-700">
-                    {analysisResults.analysis.rootCause}
+                    {analysisResults.rootCause}
                   </p>
                 </div>
               )}
 
+              {/* Confidence Score */}
+              {analysisResults.confidence && (
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="text-sm font-medium">Analysis Confidence</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-24 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full" 
+                        style={{ width: `${analysisResults.confidence}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-sm font-bold">{analysisResults.confidence}%</span>
+                  </div>
+                </div>
+              )}
+
               {/* Recommended Solutions */}
-              {analysisResults.analysis?.solutions && analysisResults.analysis.solutions.length > 0 && (
+              {analysisResults.solutions && analysisResults.solutions.length > 0 && (
                 <div className="border-l-4 border-success bg-green-50 p-4 rounded-r-lg">
                   <h4 className="font-semibold text-success mb-3 flex items-center space-x-2">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -212,7 +228,7 @@ org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDB
                     <span>Recommended Solutions</span>
                   </h4>
                   <div className="space-y-2">
-                    {analysisResults.analysis.solutions.map((solution: any, index: number) => (
+                    {analysisResults.solutions.map((solution: any, index: number) => (
                       <div key={index} className="flex items-start space-x-3">
                         <div className="flex-shrink-0 w-6 h-6 bg-success text-white rounded-full flex items-center justify-center text-xs font-bold">
                           {index + 1}
@@ -232,14 +248,14 @@ org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDB
               )}
 
               {/* Diagnostic Commands */}
-              {analysisResults.analysis?.diagnosticCommands && analysisResults.analysis.diagnosticCommands.length > 0 && (
+              {analysisResults.diagnosticCommands && analysisResults.diagnosticCommands.length > 0 && (
                 <div className="border-l-4 border-primary bg-blue-50 p-4 rounded-r-lg">
                   <h4 className="font-semibold text-primary mb-3 flex items-center space-x-2">
                     <Terminal className="w-4 h-4" />
                     <span>Diagnostic Commands</span>
                   </h4>
                   <div className="space-y-2">
-                    {analysisResults.analysis.diagnosticCommands.map((cmd: any, index: number) => (
+                    {analysisResults.diagnosticCommands.map((cmd: any, index: number) => (
                       <div key={index} className="bg-gray-900 rounded-lg p-3 font-mono text-sm">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-gray-400">
