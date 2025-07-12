@@ -63,7 +63,6 @@ export class MemStorage implements IStorage {
         issueType: "database",
         similarity: 95,
         resolution: "Increased connection pool size and implemented connection leak detection",
-        resolvedAt: new Date("2024-01-12"),
       },
       {
         ticketNumber: "TICKET-2791",
@@ -77,7 +76,6 @@ export class MemStorage implements IStorage {
         issueType: "application",
         similarity: 87,
         resolution: "Fixed transaction management to properly close connections",
-        resolvedAt: new Date("2024-01-08"),
       },
       {
         ticketNumber: "TICKET-2756",
@@ -91,7 +89,6 @@ export class MemStorage implements IStorage {
         issueType: "database",
         similarity: 78,
         resolution: "Optimized queries and implemented connection pooling best practices",
-        resolvedAt: new Date("2024-01-05"),
       }
     ];
 
@@ -130,10 +127,20 @@ export class MemStorage implements IStorage {
   async createTicket(insertTicket: InsertTicket): Promise<Ticket> {
     const id = this.currentTicketId++;
     const ticket: Ticket = {
-      ...insertTicket,
       id,
+      ticketNumber: insertTicket.ticketNumber,
+      title: insertTicket.title,
+      description: insertTicket.description,
+      status: insertTicket.status || "open",
+      priority: insertTicket.priority || "medium",
+      assignedTo: insertTicket.assignedTo || null,
+      resolvedBy: insertTicket.resolvedBy || null,
+      environment: insertTicket.environment || null,
+      issueType: insertTicket.issueType || null,
+      similarity: insertTicket.similarity || null,
+      resolution: insertTicket.resolution || null,
       createdAt: new Date(),
-      resolvedAt: insertTicket.status === "resolved" ? (insertTicket.resolvedAt || new Date()) : null,
+      resolvedAt: insertTicket.status === "resolved" ? new Date() : null,
     };
     this.tickets.set(id, ticket);
     return ticket;
@@ -159,8 +166,14 @@ export class MemStorage implements IStorage {
   async createAnalysisResult(insertResult: InsertAnalysisResult): Promise<AnalysisResult> {
     const id = this.currentAnalysisId++;
     const result: AnalysisResult = {
-      ...insertResult,
       id,
+      inputText: insertResult.inputText,
+      rootCause: insertResult.rootCause || null,
+      solutions: insertResult.solutions || null,
+      diagnosticCommands: insertResult.diagnosticCommands || null,
+      issueType: insertResult.issueType || null,
+      environment: insertResult.environment || null,
+      confidence: insertResult.confidence || null,
       createdAt: new Date(),
     };
     this.analysisResults.set(id, result);
@@ -182,8 +195,10 @@ export class MemStorage implements IStorage {
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
     const id = this.currentChatId++;
     const message: ChatMessage = {
-      ...insertMessage,
       id,
+      sessionId: insertMessage.sessionId,
+      message: insertMessage.message,
+      isUser: insertMessage.isUser ?? false,
       timestamp: new Date(),
     };
     this.chatMessages.set(id, message);

@@ -27,8 +27,8 @@ export default function AnalysisPanel({
 org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDBC Connection
     at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:82)
     at org.springframework.orm.hibernate5.HibernateTransactionManager.doBegin(HibernateTransactionManager.java:448)`);
-  const [issueType, setIssueType] = useState("");
-  const [environment, setEnvironment] = useState("");
+  const [issueType, setIssueType] = useState("auto-detect");
+  const [environment, setEnvironment] = useState("all");
   const [copiedCommand, setCopiedCommand] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -71,8 +71,8 @@ org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDB
 
     analyzeMutation.mutate({
       inputText: inputText.trim(),
-      issueType,
-      environment,
+      issueType: issueType === "auto-detect" ? "" : issueType,
+      environment: environment === "all" ? "" : environment,
     });
   };
 
@@ -130,7 +130,7 @@ org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDB
                     <SelectValue placeholder="Auto-detect Issue Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Auto-detect Issue Type</SelectItem>
+                    <SelectItem value="auto-detect">Auto-detect Issue Type</SelectItem>
                     <SelectItem value="database">Database Error</SelectItem>
                     <SelectItem value="network">Network Issue</SelectItem>
                     <SelectItem value="application">Application Error</SelectItem>
@@ -143,7 +143,7 @@ org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDB
                     <SelectValue placeholder="All Environments" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Environments</SelectItem>
+                    <SelectItem value="all">All Environments</SelectItem>
                     <SelectItem value="production">Production</SelectItem>
                     <SelectItem value="staging">Staging</SelectItem>
                     <SelectItem value="development">Development</SelectItem>
