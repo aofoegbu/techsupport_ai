@@ -1,85 +1,127 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-
-// Proxy function to forward requests to Python Flask backend
-async function proxyToPython(url: string, method: string, body?: any) {
-  const response = await fetch(`http://localhost:5001${url}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Python backend error: ${response.status} ${response.statusText}`);
-  }
-  
-  return response.json();
-}
+import { storage } from "./storage";
+import { analyzeIssue, generateChatResponse } from "./gemini";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Proxy analyze endpoint to Python Flask backend
+  // AI Analysis endpoint using Gemini
   app.post("/api/analyze", async (req, res) => {
     try {
-      const result = await proxyToPython("/api/analyze", "POST", req.body);
-      res.json(result);
+      const { inputText, issueType, environment } = req.body;
+      
+      if (!inputText) {
+        return res.status(400).json({ message: "Input text is required" });
+      }
+      
+      const analysisResult = await analyzeIssue(inputText, issueType, environment);
+      
+      // Store analysis result
+      await storage.createAnalysisResult({
+        inputText,
+        issueType: issueType || "general",
+        environment: environment || "unknown",
+        rootCause: analysisResult.rootCause,
+        solutions: JSON.stringify(analysisResult.solutions),
+        diagnosticCommands: JSON.stringify(analysisResult.diagnosticCommands),
+        confidence: analysisResult.confidence
+      });
+      
+      res.json(analysisResult);
     } catch (error) {
-      console.error("Analysis proxy error:", error);
+      console.error("Analysis error:", error);
       res.status(500).json({ 
         message: "Failed to analyze issue. Please check your Gemini API key and try again." 
       });
     }
   });
 
-  // Proxy chat endpoint to Python Flask backend
+  // Chat endpoint using Gemini
   app.post("/api/chat", async (req, res) => {
     try {
-      const result = await proxyToPython("/api/chat", "POST", req.body);
-      res.json(result);
+      const { message, sessionId } = req.body;
+      
+      if (!message || !sessionId) {
+        return res.status(400).json({ message: "Message and session ID are required" });
+      }
+      
+      // Get chat history for context
+      const chatHistory = await storage.getChatMessages(sessionId);
+      
+      // Prepare messages for AI
+      const messages = [
+        ...chatHistory.map(msg => ({
+          role: msg.isUser ? "user" : "assistant",
+          content: msg.message
+        })),
+        { role: "user", content: message }
+      ];
+      
+      const aiResponse = await generateChatResponse(messages);
+      
+      // Store user message
+      await storage.createChatMessage({
+        sessionId,
+        message,
+        isUser: true
+      });
+      
+      // Store AI response
+      await storage.createChatMessage({
+        sessionId,
+        message: aiResponse,
+        isUser: false
+      });
+      
+      res.json({ message: aiResponse });
     } catch (error) {
-      console.error("Chat proxy error:", error);
+      console.error("Chat error:", error);
       res.status(500).json({ 
         message: "Failed to process chat message. Please try again." 
       });
     }
   });
 
-  // Proxy chat history endpoint to Python Flask backend
+  // Chat history endpoint
   app.get("/api/chat/:sessionId", async (req, res) => {
     try {
       const { sessionId } = req.params;
-      const result = await proxyToPython(`/api/chat/${sessionId}`, "GET");
-      res.json(result);
+      const messages = await storage.getChatMessages(sessionId);
+      res.json({ messages });
     } catch (error) {
-      console.error("Chat history proxy error:", error);
-      res.status(500).json({ message: "Failed to fetch chat history" });
+      console.error("Chat history error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch chat history. Please try again." 
+      });
     }
   });
 
-  // Proxy similar tickets endpoint to Python Flask backend
-  app.get("/api/tickets/similar", async (req, res) => {
+  // Similar tickets endpoint
+  app.get("/api/similar-tickets", async (req, res) => {
     try {
-      const queryParams = new URLSearchParams(req.query as Record<string, string>);
-      const result = await proxyToPython(`/api/tickets/similar?${queryParams}`, "GET");
-      res.json(result);
+      const { query } = req.query;
+      const tickets = await storage.searchSimilarTickets(query as string || "");
+      res.json({ tickets });
     } catch (error) {
-      console.error("Similar tickets proxy error:", error);
-      res.status(500).json({ message: "Failed to fetch similar tickets" });
+      console.error("Similar tickets error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch similar tickets. Please try again." 
+      });
     }
   });
 
-  // Proxy all tickets endpoint to Python Flask backend
+  // All tickets endpoint
   app.get("/api/tickets", async (req, res) => {
     try {
-      const result = await proxyToPython("/api/tickets", "GET");
-      res.json(result);
+      const tickets = await storage.getAllTickets();
+      res.json({ tickets });
     } catch (error) {
-      console.error("Tickets proxy error:", error);
-      res.status(500).json({ message: "Failed to fetch tickets" });
+      console.error("Tickets error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch tickets. Please try again." 
+      });
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  const server = createServer(app);
+  return server;
 }
