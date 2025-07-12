@@ -19,11 +19,12 @@ Preferred communication style: Simple, everyday language.
 - **Build Tool**: Vite for development and production builds
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js server
-- **Language**: TypeScript with ES modules
-- **API Integration**: OpenAI GPT-4 for AI-powered analysis
-- **Session Management**: Express sessions with in-memory storage
-- **Request Logging**: Custom middleware for API request/response logging
+- **Runtime**: Python 3.11 with Flask web framework
+- **Language**: Python with type hints
+- **API Integration**: Google Gemini AI for AI-powered analysis (free tier)
+- **Session Management**: In-memory storage for development
+- **CORS**: Flask-CORS for cross-origin requests
+- **Port Configuration**: Flask server runs on port 5001
 
 ### Database & Storage
 - **ORM**: Drizzle ORM configured for PostgreSQL

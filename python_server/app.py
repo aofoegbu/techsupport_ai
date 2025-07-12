@@ -381,5 +381,7 @@ def serve_frontend(path):
     return send_from_directory("client/dist", "index.html")
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
+    # Use port 5001 to avoid conflict with Node.js server
+    port = int(os.getenv('PYTHON_PORT', 5001))
+    print(f"Starting Python Flask server on port {port}")
     app.run(host='0.0.0.0', port=port, debug=True)
