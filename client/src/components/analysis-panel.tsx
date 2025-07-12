@@ -104,7 +104,16 @@ org.springframework.dao.DataAccessResourceFailureException: Failed to obtain JDB
               <Search className="w-5 h-5 text-primary" />
               <span>Issue Analysis</span>
             </h2>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                console.log('Analysis panel Upload Log clicked');
+                // Trigger file upload from FAQ sidebar
+                const event = new CustomEvent('trigger-file-upload');
+                window.dispatchEvent(event);
+              }}
+            >
               <Upload className="w-4 h-4 mr-1" />
               Upload Log
             </Button>

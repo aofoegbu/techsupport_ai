@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import * as React from "react";
 import { ChevronDown, ChevronRight, HelpCircle, MessageSquare, Search, Lightbulb, BookOpen, History, Settings, Bell, Zap, Database, Download, RefreshCw, Upload, Clock, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -70,6 +71,27 @@ export default function FAQSidebar() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [activeSection, setActiveSection] = useState<string>("faq");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Listen for external section changes
+  React.useEffect(() => {
+    const handleSectionChange = (event: CustomEvent) => {
+      console.log('FAQ sidebar received section change:', event.detail);
+      setActiveSection(event.detail);
+    };
+
+    const handleFileUpload = () => {
+      console.log('FAQ sidebar received file upload trigger');
+      fileInputRef.current?.click();
+    };
+
+    window.addEventListener('faq-section-change', handleSectionChange as EventListener);
+    window.addEventListener('trigger-file-upload', handleFileUpload);
+
+    return () => {
+      window.removeEventListener('faq-section-change', handleSectionChange as EventListener);
+      window.removeEventListener('trigger-file-upload', handleFileUpload);
+    };
+  }, []);
 
   const toggleItem = (id: string) => {
     const newOpenItems = new Set(openItems);

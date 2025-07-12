@@ -9,9 +9,26 @@ export default function Dashboard() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [sessionId] = useState(() => `session-${Date.now()}`);
 
+  const handleHeaderSectionChange = (section: string) => {
+    console.log('Dashboard handling section change:', section);
+    // Dispatch custom event to FAQ sidebar
+    const event = new CustomEvent('faq-section-change', { detail: section });
+    window.dispatchEvent(event);
+  };
+
+  const handleHeaderNotificationClick = () => {
+    console.log('Dashboard handling notification click');
+    // Dispatch custom event to FAQ sidebar
+    const event = new CustomEvent('faq-section-change', { detail: 'notifications' });
+    window.dispatchEvent(event);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header 
+        onSectionChange={handleHeaderSectionChange}
+        onNotificationClick={handleHeaderNotificationClick}
+      />
       <div className="flex">
         {/* Left FAQ Panel - Always visible */}
         <div className="w-80 border-r bg-card/50 min-h-[calc(100vh-64px)] overflow-y-auto">

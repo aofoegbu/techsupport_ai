@@ -1,6 +1,34 @@
 import { Bell, Settings } from "lucide-react";
 
-export default function Header() {
+interface HeaderProps {
+  onSectionChange?: (section: string) => void;
+  onNotificationClick?: () => void;
+}
+
+export default function Header({ onSectionChange, onNotificationClick }: HeaderProps) {
+  const handleSectionClick = (section: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log(`Header ${section} clicked`);
+    if (onSectionChange) {
+      onSectionChange(section);
+    } else {
+      // Fallback: Try to trigger FAQ sidebar directly
+      const event = new CustomEvent('faq-section-change', { detail: section });
+      window.dispatchEvent(event);
+    }
+  };
+
+  const handleNotificationClick = () => {
+    console.log('Header notifications clicked');
+    if (onNotificationClick) {
+      onNotificationClick();
+    } else {
+      // Fallback: Try to trigger FAQ sidebar notifications
+      const event = new CustomEvent('faq-section-change', { detail: 'notifications' });
+      window.dispatchEvent(event);
+    }
+  };
+
   return (
     <header className="bg-surface shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,22 +45,37 @@ export default function Header() {
           </div>
           
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#" className="text-primary font-medium border-b-2 border-primary pb-1">
+            <button 
+              onClick={(e) => handleSectionClick('faq', e)}
+              className="text-primary font-medium border-b-2 border-primary pb-1"
+            >
               Dashboard
-            </a>
-            <a href="#" className="text-gray-600 hover:text-primary transition-colors">
+            </button>
+            <button 
+              onClick={(e) => handleSectionClick('knowledge', e)}
+              className="text-gray-600 hover:text-primary transition-colors"
+            >
               Knowledge Base
-            </a>
-            <a href="#" className="text-gray-600 hover:text-primary transition-colors">
+            </button>
+            <button 
+              onClick={(e) => handleSectionClick('history', e)}
+              className="text-gray-600 hover:text-primary transition-colors"
+            >
               History
-            </a>
-            <a href="#" className="text-gray-600 hover:text-primary transition-colors">
+            </button>
+            <button 
+              onClick={(e) => handleSectionClick('settings', e)}
+              className="text-gray-600 hover:text-primary transition-colors"
+            >
               Settings
-            </a>
+            </button>
           </nav>
           
           <div className="flex items-center space-x-3">
-            <button className="p-2 text-gray-400 hover:text-secondary transition-colors">
+            <button 
+              onClick={handleNotificationClick}
+              className="p-2 text-gray-400 hover:text-secondary transition-colors"
+            >
               <Bell className="w-5 h-5" />
             </button>
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
