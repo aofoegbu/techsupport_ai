@@ -111,11 +111,31 @@ export default function FAQSidebar() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
-        // Auto-fill the analysis panel with uploaded log content
-        const analysisPanel = document.querySelector('textarea[placeholder*="Paste your error"]') as HTMLTextAreaElement;
+        // Try multiple selectors to find the analysis textarea
+        const selectors = [
+          'textarea[placeholder*="Paste your error message"]',
+          'textarea[placeholder*="error"]', 
+          'textarea[placeholder*="log"]',
+          'textarea',
+          '[data-testid="analysis-input"]'
+        ];
+        
+        let analysisPanel: HTMLTextAreaElement | null = null;
+        for (const selector of selectors) {
+          analysisPanel = document.querySelector(selector) as HTMLTextAreaElement;
+          if (analysisPanel) break;
+        }
+        
         if (analysisPanel) {
           analysisPanel.value = content;
+          analysisPanel.focus();
+          // Trigger multiple events to ensure React updates
           analysisPanel.dispatchEvent(new Event('input', { bubbles: true }));
+          analysisPanel.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('File content loaded into analysis panel');
+        } else {
+          console.log('Analysis panel not found, will display content in alert');
+          alert(`File "${file.name}" content:\n\n${content.substring(0, 500)}${content.length > 500 ? '...' : ''}`);
         }
         alert(`Log file "${file.name}" uploaded successfully!`);
       };
@@ -435,7 +455,10 @@ export default function FAQSidebar() {
             <Button
               variant={activeSection === "knowledge" ? "default" : "outline"}
               size="sm"
-              onClick={() => setActiveSection("knowledge")}
+              onClick={() => {
+                console.log('Knowledge Base clicked');
+                setActiveSection("knowledge");
+              }}
               className="text-xs"
             >
               <BookOpen className="h-3 w-3 mr-1" />
@@ -444,7 +467,10 @@ export default function FAQSidebar() {
             <Button
               variant={activeSection === "history" ? "default" : "outline"}
               size="sm"
-              onClick={() => setActiveSection("history")}
+              onClick={() => {
+                console.log('History clicked');
+                setActiveSection("history");
+              }}
               className="text-xs"
             >
               <History className="h-3 w-3 mr-1" />
@@ -453,7 +479,10 @@ export default function FAQSidebar() {
             <Button
               variant={activeSection === "settings" ? "default" : "outline"}
               size="sm"
-              onClick={() => setActiveSection("settings")}
+              onClick={() => {
+                console.log('Settings clicked');
+                setActiveSection("settings");
+              }}
               className="text-xs"
             >
               <Settings className="h-3 w-3 mr-1" />
@@ -464,7 +493,10 @@ export default function FAQSidebar() {
           <Button
             variant={activeSection === "notifications" ? "default" : "outline"}
             size="sm"
-            onClick={() => setActiveSection("notifications")}
+            onClick={() => {
+              console.log('Notifications clicked');
+              setActiveSection("notifications");
+            }}
             className="text-xs w-full mt-2"
           >
             <Bell className="h-3 w-3 mr-1" />
@@ -477,11 +509,17 @@ export default function FAQSidebar() {
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-muted-foreground">Quick Actions</h4>
             <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => {
+                console.log('Upload Log clicked');
+                fileInputRef.current?.click();
+              }} className="justify-start text-xs">
                 <Upload className="h-3 w-3 mr-2" />
                 Upload Log
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setActiveSection("system-health")} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => {
+                console.log('System Health clicked');
+                setActiveSection("system-health");
+              }} className="justify-start text-xs">
                 <Search className="h-3 w-3 mr-2" />
                 Check System Health
               </Button>
@@ -505,11 +543,17 @@ export default function FAQSidebar() {
                 <Download className="h-3 w-3 mr-2" />
                 Generate Report
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setActiveSection("escalation")} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => {
+                console.log('Escalate to L2 clicked');
+                setActiveSection("escalation");
+              }} className="justify-start text-xs">
                 <Zap className="h-3 w-3 mr-2" />
                 Escalate to L2
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setActiveSection("maintenance")} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => {
+                console.log('Schedule Maintenance clicked');
+                setActiveSection("maintenance");
+              }} className="justify-start text-xs">
                 <Database className="h-3 w-3 mr-2" />
                 Schedule Maintenance
               </Button>
