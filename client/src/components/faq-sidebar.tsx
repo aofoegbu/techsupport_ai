@@ -435,7 +435,7 @@ export default function FAQSidebar() {
             <Button
               variant={activeSection === "knowledge" ? "default" : "outline"}
               size="sm"
-              onClick={handleKnowledgeBase}
+              onClick={() => setActiveSection("knowledge")}
               className="text-xs"
             >
               <BookOpen className="h-3 w-3 mr-1" />
@@ -444,7 +444,7 @@ export default function FAQSidebar() {
             <Button
               variant={activeSection === "history" ? "default" : "outline"}
               size="sm"
-              onClick={handleHistory}
+              onClick={() => setActiveSection("history")}
               className="text-xs"
             >
               <History className="h-3 w-3 mr-1" />
@@ -453,7 +453,7 @@ export default function FAQSidebar() {
             <Button
               variant={activeSection === "settings" ? "default" : "outline"}
               size="sm"
-              onClick={handleSettings}
+              onClick={() => setActiveSection("settings")}
               className="text-xs"
             >
               <Settings className="h-3 w-3 mr-1" />
@@ -464,7 +464,7 @@ export default function FAQSidebar() {
           <Button
             variant={activeSection === "notifications" ? "default" : "outline"}
             size="sm"
-            onClick={handleNotifications}
+            onClick={() => setActiveSection("notifications")}
             className="text-xs w-full mt-2"
           >
             <Bell className="h-3 w-3 mr-1" />
@@ -477,27 +477,43 @@ export default function FAQSidebar() {
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-muted-foreground">Quick Actions</h4>
             <div className="grid grid-cols-1 gap-2">
-              <Button variant="outline" size="sm" onClick={uploadLog} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="justify-start text-xs">
                 <Upload className="h-3 w-3 mr-2" />
                 Upload Log
               </Button>
-              <Button variant="outline" size="sm" onClick={checkSystemHealth} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => setActiveSection("system-health")} className="justify-start text-xs">
                 <Search className="h-3 w-3 mr-2" />
                 Check System Health
               </Button>
-              <Button variant="outline" size="sm" onClick={generateIncidentReport} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => {
+                const reportData = {
+                  timestamp: new Date().toISOString(),
+                  incident: "System Analysis Report",
+                  severity: "Medium",
+                  status: "Investigating",
+                  description: "Automated incident report generated from AI analysis"
+                };
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `incident-report-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                alert('Incident report generated and downloaded!');
+              }} className="justify-start text-xs">
                 <Download className="h-3 w-3 mr-2" />
                 Generate Report
               </Button>
-              <Button variant="outline" size="sm" onClick={escalateToL2} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => setActiveSection("escalation")} className="justify-start text-xs">
                 <Zap className="h-3 w-3 mr-2" />
                 Escalate to L2
               </Button>
-              <Button variant="outline" size="sm" onClick={scheduleMaintenance} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => setActiveSection("maintenance")} className="justify-start text-xs">
                 <Database className="h-3 w-3 mr-2" />
                 Schedule Maintenance
               </Button>
-              <Button variant="outline" size="sm" onClick={refreshData} className="justify-start text-xs">
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()} className="justify-start text-xs">
                 <RefreshCw className="h-3 w-3 mr-2" />
                 Refresh Data
               </Button>
