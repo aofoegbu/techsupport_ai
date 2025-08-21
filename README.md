@@ -2,7 +2,7 @@
 
 An advanced AI-powered support troubleshooting application that leverages Google Gemini AI to provide comprehensive issue analysis, interactive problem-solving, and real-time system diagnostics.
 
-https://tech-support-ai-augustineogelo.replit.app/
+https://techsupport.ogelollm.app
  
 ![Tech Support AI](screenshots/ai_support.png)
 
