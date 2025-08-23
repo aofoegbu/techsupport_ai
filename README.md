@@ -226,7 +226,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and questions:
 - Check the FAQ section in the application
-- Review the documentation in `replit.md`
+- Review the documentation in `notes.md`
 - Submit issues through the built-in chat system
 - Contact the development team
 
@@ -241,4 +241,3 @@ For support and questions:
 
 ---
 
-Built with ❤️ using React, Node.js, and Google Gemini AI
